@@ -6,6 +6,7 @@ package thietbi;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ClassRoom {
@@ -15,6 +16,10 @@ public class ClassRoom {
     private List<Device> danhSachThietBi = new ArrayList<>();
 
     public ClassRoom(String maPhong, String tenPhong, int sucChua) {
+        if (maPhong == null || maPhong.trim().isEmpty())
+            throw new IllegalArgumentException("Ma phong khong duoc rong");
+        if (sucChua <= 0)
+            throw new IllegalArgumentException("Suc chua phai > 0");
         this.maPhong = maPhong;
         this.tenPhong = tenPhong;
         this.sucChua = sucChua;
@@ -33,7 +38,8 @@ public class ClassRoom {
     }
 
     public List<Device> getDanhSachThietBi() {
-        return danhSachThietBi;
+        // tra ban chi doc de ben ngoai khong them thang vao list, bo qua kiem tra cua addDevice
+        return Collections.unmodifiableList(danhSachThietBi);
     }
 
     public void addDevice(Device device) {
@@ -52,8 +58,12 @@ public class ClassRoom {
     }
 
     public Device findDevice(String deviceId) {
+        if (deviceId == null)
+            return null;
+        // Device luu ma da trim nen ma nhap vao cung phai trim
+        String ma = deviceId.trim();
         for (Device tb : danhSachThietBi) {
-            if (tb.getMa().equals(deviceId))
+            if (tb.getMa().equals(ma))
                 return tb;
         }
         return null;

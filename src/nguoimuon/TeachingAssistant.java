@@ -9,6 +9,10 @@ public class TeachingAssistant implements IBorrower {
     private final String fullName;
 
     public TeachingAssistant(String borrowerId, String fullName) {
+        if (borrowerId == null || borrowerId.trim().isEmpty())
+            throw new IllegalArgumentException("Ma nguoi muon khong duoc rong");
+        if (fullName == null || fullName.trim().isEmpty())
+            throw new IllegalArgumentException("Ho ten nguoi muon khong duoc rong");
         this.borrowerId = borrowerId;
         this.fullName = fullName;
     }

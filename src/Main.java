@@ -7,7 +7,6 @@ import thietbi.Device;
 import thietbi.DieuKhienMayChieu;
 import thietbi.DieuKhienDieuHoa;
 import thietbi.Micro;
-import thietbi.DeviceStatus;
 import nguoimuon.Lecturer;
 import nguoimuon.TeachingAssistant;
 import phieumuon.BorrowingSlip;
@@ -80,10 +79,12 @@ public class Main {
             System.out.println("Loi: " + e.getMessage());
         }
 
-        System.out.println("Phieu tra muon:");
+        // co dinh ngay tinh phi de lan chay nao cung ra cung ket qua
+        LocalDate ngayTinh = LocalDate.of(2026, 10, 10);
+        System.out.println("Phieu tra muon (tinh den " + ngayTinh + "):");
         for (BorrowingSlip p : dsPhieu) {
-            if (p.coThietBiTraMuon())
-                System.out.printf("  %s, tong phi tre %.0f%n", p.getSlipId(), p.calculateTotalLateFee());
+            if (p.coThietBiTraMuon(ngayTinh))
+                System.out.printf("  %s, tong phi tre %.0f%n", p.getSlipId(), p.calculateTotalLateFee(ngayTinh));
         }
         System.out.println("Phieu chua tra:");
         for (BorrowingSlip p : dsPhieu) {
@@ -99,7 +100,7 @@ public class Main {
         TeachingAssistant troGiang = new TeachingAssistant("TG01", "Le Van C");
 
         DieuKhienDieuHoa dieuHoaHong = new DieuKhienDieuHoa("AC03", "Dieu khien dieu hoa hong", 2020, 200000);
-        dieuHoaHong.setTrangThai(DeviceStatus.UNDER_MAINTENANCE);
+        dieuHoaHong.chuyenSangBaoTri();
         DieuKhienMayChieu mayChieu1 = new DieuKhienMayChieu("PR03", "Dieu khien may chieu 1", 2022, 300000);
         DieuKhienMayChieu mayChieu2 = new DieuKhienMayChieu("PR04", "Dieu khien may chieu 2", 2022, 300000);
         Micro micro1 = new Micro("MC03", "Micro co day", 2022, 500000, false);
@@ -155,6 +156,15 @@ public class Main {
             System.out.println("7. " + e.getMessage());
         } finally {
             System.out.println("   Trang thai PR03 sau loi: " + mayChieu1.getTrangThai());
+        }
+
+        // tinh huong them: micro chi duoc muon toi da 4 tiet
+        Micro micro3 = new Micro("MC05", "Micro co day 2", 2022, 500000, false);
+        try {
+            phieuGV.addDevice(micro3, 1, 1, 6);
+        } catch (BorrowingException e) {
+            System.out.println("8. " + e.getMessage());
+            System.out.println("   Trang thai MC05 sau loi: " + micro3.getTrangThai());
         }
     }
 }

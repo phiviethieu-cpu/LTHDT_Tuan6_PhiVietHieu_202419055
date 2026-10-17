@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 
 import ngoaile.DeviceAlreadyReturnedException;
 import ngoaile.NgayTraKhongHopLeException;
+import ngoaile.TietMuonKhongHopLeException;
 import thietbi.TeachingDevice;
 
 public class BorrowItem {
@@ -20,13 +21,14 @@ public class BorrowItem {
     private LocalDate returnedDate;
 
     public BorrowItem(TeachingDevice device, LocalDate borrowedDate, LocalDate dueDate,
-                      int fromPeriod, int toPeriod) {
+                      int fromPeriod, int toPeriod) throws TietMuonKhongHopLeException {
         if (device == null)
             throw new IllegalArgumentException("Thiet bi khong duoc null");
+        if (borrowedDate == null || dueDate == null)
+            throw new IllegalArgumentException("Ngay muon va han tra khong duoc null");
         if (dueDate.isBefore(borrowedDate))
             throw new IllegalArgumentException("Han tra truoc ngay muon");
-        if (fromPeriod < 1 || toPeriod < fromPeriod || toPeriod > device.getSoTietToiDa())
-            throw new IllegalArgumentException("Tiet " + fromPeriod + "-" + toPeriod + " khong hop le");
+        kiemTraTiet(device, fromPeriod, toPeriod);
         this.device = device;
         this.borrowedDate = borrowedDate;
         this.dueDate = dueDate;
@@ -50,7 +52,8 @@ public class BorrowItem {
         return fromPeriod;
     }
 
-    public void setFromPeriod(int fromPeriod) {
+    public void setFromPeriod(int fromPeriod) throws TietMuonKhongHopLeException {
+        kiemTraTiet(device, fromPeriod, toPeriod);
         this.fromPeriod = fromPeriod;
     }
 
@@ -58,8 +61,16 @@ public class BorrowItem {
         return toPeriod;
     }
 
-    public void setToPeriod(int toPeriod) {
+    public void setToPeriod(int toPeriod) throws TietMuonKhongHopLeException {
+        kiemTraTiet(device, fromPeriod, toPeriod);
         this.toPeriod = toPeriod;
+    }
+
+    // so tiet toi da la so luong tiet duoc muon, khong phai so thu tu tiet cuoi
+    private static void kiemTraTiet(TeachingDevice device, int fromPeriod, int toPeriod)
+            throws TietMuonKhongHopLeException {
+        if (fromPeriod < 1 || toPeriod < fromPeriod || toPeriod - fromPeriod + 1 > device.getSoTietToiDa())
+            throw new TietMuonKhongHopLeException(device.getMa(), fromPeriod, toPeriod, device.getSoTietToiDa());
     }
 
     public LocalDate getReturnedDate() {
@@ -72,6 +83,8 @@ public class BorrowItem {
 
     public void returnDevice(LocalDate returnedDate)
             throws DeviceAlreadyReturnedException, NgayTraKhongHopLeException {
+        if (returnedDate == null)
+            throw new IllegalArgumentException("Ngay tra khong duoc null");
         if (isReturned())
             throw new DeviceAlreadyReturnedException(device.getMa());
         if (returnedDate.isBefore(borrowedDate))
@@ -80,15 +93,16 @@ public class BorrowItem {
         this.returnedDate = returnedDate;
     }
 
-    public long getSoNgayTre() {
-        // chua tra thi tinh tre den hom nay, nen ket qua thay doi theo ngay chay chuong trinh
-        LocalDate ngayKetThuc = isReturned() ? returnedDate : LocalDate.now();
+    // da tra thi tinh den ngay tra, chua tra thi tinh den ngayTinh truyen vao
+    // (truyen ngay vao de ket qua khong phu thuoc ngay chay chuong trinh)
+    public long getSoNgayTre(LocalDate ngayTinh) {
+        LocalDate ngayKetThuc = isReturned() ? returnedDate : ngayTinh;
         long soNgay = ChronoUnit.DAYS.between(dueDate, ngayKetThuc);
         return soNgay > 0 ? soNgay : 0;
     }
 
-    public double tinhPhiTre() {
-        return getSoNgayTre() * device.getPhiTreMoiNgay();
+    public double tinhPhiTre(LocalDate ngayTinh) {
+        return getSoNgayTre(ngayTinh) * device.getPhiTreMoiNgay();
     }
 
     @Override

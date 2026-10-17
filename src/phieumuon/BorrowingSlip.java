@@ -32,6 +32,8 @@ public class BorrowingSlip {
             throw new IllegalArgumentException("Phieu phai co nguoi muon");
         if (teachingRoom == null || teachingRoom.trim().isEmpty())
             throw new IllegalArgumentException("Thieu phong day");
+        if (borrowedDate == null)
+            throw new IllegalArgumentException("Thieu ngay muon");
         this.slipId = slipId;
         this.borrower = borrower;
         this.teachingRoom = teachingRoom;
@@ -93,26 +95,33 @@ public class BorrowingSlip {
     public double returnDevice(String deviceId, LocalDate returnedDate) throws BorrowingException {
         if (deviceId == null || deviceId.trim().isEmpty())
             throw new IllegalArgumentException("Chua nhap ma thiet bi");
+        // Device luu ma da trim nen ma nhap vao cung phai trim
+        deviceId = deviceId.trim();
         BorrowItem item = timMucMuon(deviceId);
         if (item == null)
             throw new DeviceNotInSlipException(deviceId);
         // ghi ngay tra truoc: neu ngay tra sai thi thiet bi van giu BORROWED
         item.returnDevice(returnedDate);
         item.getDevice().danhDauSanSang();
-        return item.tinhPhiTre();
+        return item.tinhPhiTre(returnedDate);
     }
 
+    // giu dung chu ky cua de, thiet bi chua tra tinh tre den hom nay
     public double calculateTotalLateFee() {
+        return calculateTotalLateFee(LocalDate.now());
+    }
+
+    public double calculateTotalLateFee(LocalDate ngayTinh) {
         double tong = 0;
         for (BorrowItem item : items) {
-            tong += item.tinhPhiTre();
+            tong += item.tinhPhiTre(ngayTinh);
         }
         return tong;
     }
 
-    public boolean coThietBiTraMuon() {
+    public boolean coThietBiTraMuon(LocalDate ngayTinh) {
         for (BorrowItem item : items) {
-            if (item.getSoNgayTre() > 0)
+            if (item.getSoNgayTre(ngayTinh) > 0)
                 return true;
         }
         return false;

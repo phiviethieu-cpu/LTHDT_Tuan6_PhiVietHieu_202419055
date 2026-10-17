@@ -31,10 +31,15 @@ public abstract class TeachingDevice extends Device {
     }
 
     public void markAsBorrowed() {
+        if (getTrangThai() != DeviceStatus.AVAILABLE)
+            throw new IllegalStateException("Thiet bi " + getMa() + " khong san sang de muon");
         setTrangThai(DeviceStatus.BORROWED);
     }
 
     public void danhDauSanSang() {
+        // chi thiet bi dang muon moi duoc tra ve san sang, tranh xoa mat trang thai bao tri
+        if (getTrangThai() != DeviceStatus.BORROWED)
+            throw new IllegalStateException("Thiet bi " + getMa() + " khong o trang thai dang muon");
         setTrangThai(DeviceStatus.AVAILABLE);
     }
 }

@@ -13,7 +13,17 @@ src/
   Main.java   chạy thử luồng thành công và các tình huống lỗi
 ```
 
-`NgayTraKhongHopLeException` là ngoại lệ thêm ngoài đề, dùng khi ngày trả trước ngày mượn.
+Ngoại lệ thêm ngoài đề:
+
+- `NgayTraKhongHopLeException`: ngày trả trước ngày mượn.
+- `TietMuonKhongHopLeException`: tiết mượn sai (từ tiết lớn hơn đến tiết, hoặc số tiết vượt mức tối đa của thiết bị).
+
+## Quy ước
+
+- "Số tiết tối đa" là số lượng tiết được mượn liên tiếp, ví dụ micro tối đa 4 tiết thì mượn tiết 5-8 vẫn hợp lệ.
+- Giới hạn số thiết bị (giảng viên 3, trợ giảng 2) tính trên cả phiếu, kể cả thiết bị đã trả. Muốn mượn thêm thì lập phiếu mới.
+- Thiết bị chưa trả thì phí trễ tính đến ngày truyền vào `calculateTotalLateFee(ngayTinh)`. Bản không tham số tính đến hôm nay.
+- Trạng thái thiết bị chỉ đổi qua các hàm `markAsBorrowed`, `danhDauSanSang`, `chuyenSangBaoTri`, `ketThucBaoTri`. Mỗi hàm kiểm tra trạng thái hiện tại trước khi đổi.
 
 ## Biên dịch và chạy
 

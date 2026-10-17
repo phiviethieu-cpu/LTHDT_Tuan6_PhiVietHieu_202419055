@@ -16,8 +16,10 @@ public abstract class Device {
     public Device(String ma, String ten, int namSuDung, double giaMua) {
         if (ma == null || ma.trim().isEmpty())
             throw new IllegalArgumentException("Ma thiet bi khong duoc rong");
+        if (ten == null || ten.trim().isEmpty())
+            throw new IllegalArgumentException("Ten thiet bi khong duoc rong");
         this.ma = ma.trim();
-        this.ten = ten;
+        this.ten = ten.trim();
         // goi setter de constructor dung chung dieu kien kiem tra
         setNamSuDung(namSuDung);
         setGiaMua(giaMua);
@@ -37,7 +39,7 @@ public abstract class Device {
     }
 
     public void setNamSuDung(int namSuDung) {
-        if (namSuDung > Year.now().getValue())
+        if (namSuDung <= 0 || namSuDung > Year.now().getValue())
             throw new IllegalArgumentException("Nam su dung khong hop le: " + namSuDung);
         this.namSuDung = namSuDung;
     }
@@ -47,7 +49,8 @@ public abstract class Device {
     }
 
     public void setGiaMua(double giaMua) {
-        if (giaMua <= 0)
+        // viet !(> 0) de chan ca NaN
+        if (!(giaMua > 0))
             throw new IllegalArgumentException("Gia mua phai > 0");
         this.giaMua = giaMua;
     }
@@ -56,8 +59,24 @@ public abstract class Device {
         return trangThai;
     }
 
-    public void setTrangThai(DeviceStatus trangThai) {
+    // chi lop con duoc doi trang thai truc tiep, ben ngoai phai qua cac ham chuyen trang thai
+    protected void setTrangThai(DeviceStatus trangThai) {
+        if (trangThai == null)
+            throw new IllegalArgumentException("Trang thai khong duoc null");
         this.trangThai = trangThai;
+    }
+
+    public void chuyenSangBaoTri() {
+        // thiet bi dang duoc muon thi phai tra xong moi dem di bao tri
+        if (trangThai != DeviceStatus.AVAILABLE)
+            throw new IllegalStateException("Thiet bi " + ma + " dang " + trangThai + ", khong chuyen sang bao tri duoc");
+        trangThai = DeviceStatus.UNDER_MAINTENANCE;
+    }
+
+    public void ketThucBaoTri() {
+        if (trangThai != DeviceStatus.UNDER_MAINTENANCE)
+            throw new IllegalStateException("Thiet bi " + ma + " khong o trang thai bao tri");
+        trangThai = DeviceStatus.AVAILABLE;
     }
 
     public abstract double tinhChiPhiBaoTri();
