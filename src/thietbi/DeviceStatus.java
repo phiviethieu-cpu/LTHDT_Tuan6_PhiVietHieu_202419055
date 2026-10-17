@@ -1,4 +1,4 @@
-package model;
+package thietbi;
 
 public enum DeviceStatus {
     AVAILABLE,
